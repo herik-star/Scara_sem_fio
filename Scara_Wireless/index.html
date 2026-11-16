@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireless scara</title>
+    <style>
+        :root {
+            --bg-main: #050a18;
+            --bg-sidebar: #070d1f;
+            --bg-card: #0b1326;
+            --bg-card-hover: #101b36;
+            --border-subtle: #18233c;
+            --accent-blue: #4f86f7;
+            --accent-cyan: #00e5ff;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            padding: 28px 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px 32px 12px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .brand-icon {
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-item.active {
+            background-color: #111b36;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .top-header {
+            padding: 28px 48px 20px 48px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            letter-spacing: -0.5px;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .wifi-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--accent-red);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .wifi-status.connected {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--accent-green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        .content-body {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px 32px 48px 32px;
+        }
+
+        .tab-panel {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        .pill-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .pill-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pill-btn.active {
+            background-color: #16223f;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .telemetry-banner {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .telemetry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .step-badge {
+            background-color: rgba(79, 134, 247, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .step-badge.running {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .telemetry-coords {
+            color: var(--accent-blue);
+            font-family: monospace;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background-color: #131d36;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 4px;
+            transition: width 0.15s ease;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .section-heading svg {
+            color: #2dd4bf;
+            width: 18px;
+            height: 18px;
+        }
+
+        .control-list {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .control-row {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .control-row:last-child {
+            border-bottom: none;
+        }
+
+        .control-row:hover {
+            background-color: rgba(255, 255, 255, 0.015);
+        }
+
+        .row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .axis-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .radio-circle {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            display: inline-block;
+        }
+
+        .row-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .val-pill {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            background-color: #111b36;
+            padding: 4px 10px;
+            border-radius: 8px;
+            min-width: 68px;
+            text-align: center;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .jog-mini {
+            background-color: #111b36;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .jog-mini:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #131d36;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(79, 134, 247, 0.6);
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .btn-action {
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--bg-card-hover);
+            border-color: var(--accent-blue);
+        }
+
+        .btn-action.primary {
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-action.primary:hover {
+            background-color: #3b76f6;
+        }
+
+        .btn-action.running {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .card-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .step-item {
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            border-left: 3px solid transparent;
+        }
+
+        .step-item.active-step {
+            background-color: rgba(16, 185, 129, 0.12);
+            border-left-color: var(--accent-green);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .ik-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .ik-inputs input {
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin-top: 6px;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 640px;
+            height: 400px;
+            background-color: #040814;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .sim-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #040814;
+            border: 1px solid var(--border-subtle);
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .string-log {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background-color: #040814;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; overflow: auto; }
+            .sidebar { width: 100%; flex-direction: row; justify-content: space-between; padding: 14px; }
+            .nav-menu { flex-direction: row; }
+            .nav-item span { display: none; }
+            .sidebar-footer { display: none; }
+            .top-header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+            </div>
+            <span>Wireless scara</span>
+        </div>
+
+        <nav class="nav-menu">
+            <button class="nav-item active" onclick="switchNav('view-control', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+                <span>Controle</span>
+            </button>
+            <button class="nav-item" onclick="switchNav('view-sim', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Simulação 2D</span>
+            </button>
+            <button class="nav-item" onclick="switchNav('view-kinematics', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Cinemática</span>
+            </button>
+            <button class="nav-item" onclick="switchNav('view-hardware', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Ajustes & Pinos</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div style="font-size: 0.78rem; color: var(--text-secondary);">
+                Rede: <strong style="color: var(--text-primary);">Robo_SCARA</strong><br>
+                IP: 192.168.4.1:81
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="header-title">
+                <h1>Controle do SCARA</h1>
+                <p id="currentDateText">Painel Operacional • CNC Shield + ESP32</p>
+            </div>
+
+            <div id="wifiBadge" class="wifi-status" onclick="connectWebSocket()" title="Clique para reconectar">
+                <div class="status-dot"></div>
+                <span id="wifiText">DESCONECTADO</span>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <!-- ABA 1: CONTROLE PRINCIPAL -->
+            <div id="view-control" class="tab-panel active">
+                
+                <div class="pill-tabs">
+                    <button class="pill-btn active" onclick="filterSection('all', this)">Todos os Eixos</button>
+                    <button class="pill-btn" onclick="filterSection('arms', this)">Braços & Garra</button>
+                    <button class="pill-btn" onclick="filterSection('program', this)">Sequência (<span id="pillCount">0</span>)</button>
+                </div>
+
+                <div class="telemetry-banner">
+                    <div class="telemetry-header">
+                        <span id="stepStatusBadge" class="step-badge">MODO MANUAL</span>
+                        <span class="telemetry-coords" id="coordsBanner">X: 365mm | Y: 0mm | Z: 100mm | Φ: 0°</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="reachBar" style="width: 75%;"></div>
+                    </div>
+                </div>
+
+                <div id="group-arms">
+                    <div class="section-heading" style="margin-bottom: 12px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <span>Eixos Mecânicos (Motores de Passo)</span>
+                    </div>
+
+                    <div class="control-list">
+                        <div class="control-row">
+                            <div class="row-top">
+                                <div class="axis-label">
+                                    <span class="radio-circle"></span>
+                                    <span>Eixo J1 — Ombro (θ₁)</span>
+                                </div>
+                                <div class="row-controls">
+                                    <button class="jog-mini" onclick="jog('j1', -1)">-1°</button>
+                                    <button class="jog-mini" onclick="jog('j1', 1)">+1°</button>
+                                    <span class="val-pill" id="val-j1">0°</span>
+                                </div>
+                            </div>
+                            <input type="range" id="j1" min="-90" max="266" value="0" oninput="onManualInput()">
+                        </div>
+
+                        <div class="control-row">
+                            <div class="row-top">
+                                <div class="axis-label">
+                                    <span class="radio-circle"></span>
+                                    <span>Eixo J2 — Cotovelo (θ₂)</span>
+                                </div>
+                                <div class="row-controls">
+                                    <button class="jog-mini" onclick="jog('j2', -1)">-1°</button>
+                                    <button class="jog-mini" onclick="jog('j2', 1)">+1°</button>
+                                    <span class="val-pill" id="val-j2">0°</span>
+                                </div>
+                            </div>
+                            <input type="range" id="j2" min="-150" max="150" value="0" oninput="onManualInput()">
+                        </div>
+
+                        <div class="control-row">
+                            <div class="row-top">
+                                <div class="axis-label">
+                                    <span class="radio-circle"></span>
+                                    <span>Eixo J3 — Rotação da Garra (Φ)</span>
+                                </div>
+                                <div class="row-controls">
+                                    <button class="jog-mini" onclick="jog('j3', -1)">-1°</button>
+                                    <button class="jog-mini" onclick="jog('j3', 1)">+1°</button>
+                                    <span class="val-pill" id="val-j3">0°</span>
+                                </div>
+                            </div>
+                            <input type="range" id="j3" min="-162" max="162" value="0" oninput="onManualInput()">
+                        </div>
+
+                        <div class="control-row">
+                            <div class="row-top">
+                                <div class="axis-label">
+                                    <span class="radio-circle"></span>
+                                    <span>Eixo Z — Elevação Vertical</span>
+                                </div>
+                                <div class="row-controls">
+                                    <button class="jog-mini" onclick="jog('z', -5)">-5mm</button>
+                                    <button class="jog-mini" onclick="jog('z', 5)">+5mm</button>
+                                    <span class="val-pill" id="val-z">100 mm</span>
+                                </div>
+                            </div>
+                            <input type="range" id="z" min="0" max="150" value="100" oninput="onManualInput()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="group-dynamics">
+                    <div class="section-heading" style="margin-bottom: 12px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg>
+                        <span>Atuador Final & Velocidade</span>
+                    </div>
+
+                    <div class="control-list">
+                        <div class="control-row">
+                            <div class="row-top">
+                                <div class="axis-label">
+                                    <span class="radio-circle"></span>
+                                    <span>Abertura da Garra (Servo PWM)</span>
+                                </div>
+                                <span class="val-pill" id="val-gripper">50%</span>
+                            </div>
+                            <input type="range" id="gripper" min="0" max="100" value="50" oninput="onManualInput()">
+                        </div>
+
+                        <div class="control-row">
+                            <div class="row-top">
+                                <div class="axis-label">
+                                    <span class="radio-circle"></span>
+                                    <span>Velocidade dos Motores</span>
+                                </div>
+                                <span class="val-pill" id="val-speed">500</span>
+                            </div>
+                            <input type="range" id="speed" min="500" max="4000" step="100" value="500" oninput="onSpeedAccelChange()">
+                        </div>
+
+                        <div class="control-row">
+                            <div class="row-top">
+                                <div class="axis-label">
+                                    <span class="radio-circle"></span>
+                                    <span>Aceleração</span>
+                                </div>
+                                <span class="val-pill" id="val-accel">500</span>
+                            </div>
+                            <input type="range" id="accel" min="500" max="4000" step="100" value="500" oninput="onSpeedAccelChange()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-grid">
+                    <button class="btn-action primary" onclick="savePosition()">Salvar Posição</button>
+                    <button id="btnRun" class="btn-action" onclick="toggleRun()">Rodar Programa</button>
+                    <button class="btn-action" onclick="clearPositions()">Limpar Memória</button>
+                    <button class="btn-action" onclick="goHome()">Posição Inicial (Home)</button>
+                </div>
+
+                <div class="card-box" id="group-program">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <span style="font-weight:600; font-size:0.9rem;">Posições Gravadas</span>
+                        <span style="font-size:0.85rem; color:var(--accent-blue);" id="savedTags">Nenhuma</span>
+                    </div>
+                    <div id="savedListDetail" style="font-family:monospace; font-size:0.85rem; color:var(--text-secondary);">
+                        Clique em "Salvar Posição" para gravar os pontos da sequência.
+                    </div>
+                </div>
+
+                <div class="string-log" id="txLog">
+                    Pacote TX: 0,0,0,0,0,100,100,500,500
+                </div>
+            </div>
+
+            <!-- ABA 2: SIMULAÇÃO 2D SINCRONIZADA -->
+            <div id="view-sim" class="tab-panel">
+                <div class="card-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <h2 style="font-size:1.1rem;">Simulação Sincronizada em Tempo Real</h2>
+                            <p style="font-size:0.85rem; color:var(--text-secondary);">
+                                Acompanha a trajetória, velocidade e aceleração exatas do Arduino Uno.
+                            </p>
+                        </div>
+                        <button id="btnRunSim" class="btn-action primary" style="padding: 10px 16px;" onclick="toggleRun()">Rodar Programa</button>
+                    </div>
+
+                    <div class="sim-hud">
+                        <span id="simStepHud" style="color: var(--accent-cyan);">Status: Modo Manual</span>
+                        <span id="simKinHud" style="color: var(--text-primary);">Vel: 500 | Acel: 500 | Z: 100mm</span>
+                    </div>
+
+                    <canvas id="scaraCanvas" width="640" height="400"></canvas>
+                </div>
+            </div>
+
+            <!-- ABA 3: CINEMÁTICA INVERSA -->
+            <div id="view-kinematics" class="tab-panel">
+                <div class="card-box">
+                    <h2 style="font-size:1.1rem; margin-bottom:6px;">Mover por Coordenadas (Cinemática Inversa)</h2>
+                    <p style="font-size:0.85rem; color:var(--text-secondary);">
+                        Insira o alvo desejado em milímetros para calcular os ângulos J1 e J2 automaticamente.
+                    </p>
+                    <div class="ik-inputs">
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-secondary);">Alvo X (mm)</label>
+                            <input type="number" id="ikX" value="300">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-secondary);">Alvo Y (mm)</label>
+                            <input type="number" id="ikY" value="100">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-secondary);">Altura Z (mm)</label>
+                            <input type="number" id="ikZ" value="100">
+                        </div>
+                    </div>
+                    <button class="btn-action primary" style="width:100%;" onclick="applyIK()">Calcular Ângulos e Mover Robô</button>
+                </div>
+            </div>
+
+            <!-- ABA 4: AJUSTES & PINAGEM -->
+            <div id="view-hardware" class="tab-panel">
+                <div class="card-box">
+                    <h2 style="font-size:1.1rem; margin-bottom:14px;">Mapeamento CNC Shield V3 + ESP32</h2>
+                    <div class="control-list">
+                        <div class="control-row"><span class="axis-label"><strong>ESP32 TX2 (GPIO 17)</strong> → Arduino Uno RX (Pino 0)</span></div>
+                        <div class="control-row"><span class="axis-label"><strong>Eixo J1 (Ombro)</strong> → Driver X (STEP 2 / DIR 5) • Fim de Curso Z+ (Pino 11)</span></div>
+                        <div class="control-row"><span class="axis-label"><strong>Eixo J2 (Cotovelo)</strong> → Driver Y (STEP 3 / DIR 6) • Fim de Curso Y+ (Pino 10)</span></div>
+                        <div class="control-row"><span class="axis-label"><strong>Eixo J3 (Garra Φ)</strong> → Driver Z (STEP 4 / DIR 7) • Fim de Curso X+ (Pino 9)</span></div>
+                        <div class="control-row"><span class="axis-label"><strong>Eixo Z (Altura)</strong> → Driver A (STEP 12 / DIR 13) • Fim de Curso CoolEn (A3)</span></div>
+                        <div class="control-row"><span class="axis-label"><strong>Servo da Garra</strong> → Borne Abort (Pino A0)</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let isRunning = 0;
+        let saveStatus = 0;
+        let savedSteps = [];
+
+        const L1 = 228;
+        const L2 = 136.5;
+        const STEPS_J1 = 44.444444;
+        const STEPS_J2 = 35.555555;
+        const STEPS_J3 = 10.0;
+        const STEPS_Z  = 100.0;
+
+        let simState = { j1: 0, j2: 0, j3: 0, z: 100, gripper: 50 };
+        let currentStepIndex = -1;
+        let animFrameId = null;
+
+        const hoje = new Date();
+        const opcoesData = { weekday: 'long', day: 'numeric', month: 'long' };
+        const dataFormatada = hoje.toLocaleDateString('pt-BR', opcoesData);
+        document.getElementById('currentDateText').innerText = 
+            dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1) + " • Conexão ESP32";
+
+        function connectWebSocket() {
+            const badge = document.getElementById('wifiBadge');
+            const text = document.getElementById('wifiText');
+            text.innerText = "CONECTANDO...";
+
+            try {
+                socket = new WebSocket("ws://192.168.4.1:81");
+
+                socket.onopen = function() {
+                    badge.classList.add('connected');
+                    text.innerText = "WI-FI CONECTADO";
+                };
+
+                socket.onclose = socket.onerror = function() {
+                    badge.classList.remove('connected');
+                    text.innerText = "DESCONECTADO (CLIQUE P/ RECONECTAR)";
+                };
+            } catch (err) {
+                badge.classList.remove('connected');
+                text.innerText = "MODO OFFLINE";
+            }
+        }
+
+        function switchNav(panelId, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            btn.classList.add('active');
+            if (panelId === 'view-sim') drawRobot();
+        }
+
+        function filterSection(mode, btn) {
+            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.getElementById('group-arms').style.display = (mode === 'all' || mode === 'arms') ? 'block' : 'none';
+            document.getElementById('group-dynamics').style.display = (mode === 'all' || mode === 'arms') ? 'block' : 'none';
+            document.getElementById('group-program').style.display = (mode === 'all' || mode === 'program') ? 'block' : 'none';
+        }
+
+        function onManualInput() {
+            if (isRunning === 1) return;
+            simState.j1 = parseInt(document.getElementById('j1').value);
+            simState.j2 = parseInt(document.getElementById('j2').value);
+            simState.j3 = parseInt(document.getElementById('j3').value);
+            simState.z  = parseInt(document.getElementById('z').value);
+            simState.gripper = parseInt(document.getElementById('gripper').value);
+            syncVisualsAndSend(true);
+        }
+
+        function onSpeedAccelChange() {
+            const speed = parseInt(document.getElementById('speed').value);
+            const accel = parseInt(document.getElementById('accel').value);
+            document.getElementById('val-speed').innerText = speed;
+            document.getElementById('val-accel').innerText = accel;
+            document.getElementById('simKinHud').innerText = `Vel: ${speed} | Acel: ${accel} | Z: ${Math.round(simState.z)}mm`;
+            syncVisualsAndSend(true);
+        }
+
+        function syncVisualsAndSend(sendWs) {
+            const j1 = Math.round(simState.j1);
+            const j2 = Math.round(simState.j2);
+            const j3 = Math.round(simState.j3);
+            const z  = Math.round(simState.z);
+            const gripper = Math.round(simState.gripper);
+            const speed = parseInt(document.getElementById('speed').value);
+            const accel = parseInt(document.getElementById('accel').value);
+
+            document.getElementById('j1').value = j1;
+            document.getElementById('j2').value = j2;
+            document.getElementById('j3').value = j3;
+            document.getElementById('z').value  = z;
+            document.getElementById('gripper').value = gripper;
+
+            document.getElementById('val-j1').innerText = j1 + '°';
+            document.getElementById('val-j2').innerText = j2 + '°';
+            document.getElementById('val-j3').innerText = j3 + '°';
+            document.getElementById('val-z').innerText = z + ' mm';
+            document.getElementById('val-gripper').innerText = gripper + '%';
+            document.getElementById('val-speed').innerText = speed;
+            document.getElementById('val-accel').innerText = accel;
+
+            const r1 = simState.j1 * Math.PI / 180;
+            const r2 = simState.j2 * Math.PI / 180;
+            const x = Math.round(L1 * Math.cos(r1) + L2 * Math.cos(r1 + r2));
+            const y = Math.round(L1 * Math.sin(r1) + L2 * Math.sin(r1 + r2));
+
+            document.getElementById('coordsBanner').innerText = 
+                `X: ${x}mm | Y: ${y}mm | Z: ${z}mm | Φ: ${j3}°`;
+
+            document.getElementById('simKinHud').innerText = 
+                `Vel: ${speed} | Acel: ${accel} | Z: ${z}mm | Garra: ${gripper}%`;
+
+            const dist = Math.sqrt(x*x + y*y);
+            const pct = Math.min(100, Math.round((dist / (L1 + L2)) * 100));
+            document.getElementById('reachBar').style.width = pct + '%';
+
+            if (sendWs) {
+                const servoPwm = gripper + 50;
+                const payload = `${saveStatus},${isRunning},${j1},${j2},${j3},${z},${servoPwm},${speed},${accel}\n`;
+                document.getElementById('txLog').innerText = `Pacote TX: ${payload.trim()}`;
+
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(payload);
+                }
+            }
+
+            drawRobot();
+        }
+
+        function jog(id, delta) {
+            if (isRunning === 1) return;
+            const el = document.getElementById(id);
+            el.value = parseInt(el.value) + delta;
+            onManualInput();
+        }
+
+        function savePosition() {
+            saveStatus = 1;
+            const step = {
+                j1: parseInt(document.getElementById('j1').value),
+                j2: parseInt(document.getElementById('j2').value),
+                j3: parseInt(document.getElementById('j3').value),
+                z:  parseInt(document.getElementById('z').value),
+                gripper: parseInt(document.getElementById('gripper').value)
+            };
+
+            savedSteps.push(step);
+            renderSavedStepsList();
+            syncVisualsAndSend(true);
+            saveStatus = 0;
+        }
+
+        function renderSavedStepsList() {
+            document.getElementById('pillCount').innerText = savedSteps.length;
+            if (savedSteps.length === 0) {
+                document.getElementById('savedTags').innerText = "Nenhuma";
+                document.getElementById('savedListDetail').innerHTML = 
+                    'Clique em "Salvar Posição" para gravar os pontos da sequência.';
+                return;
+            }
+
+            document.getElementById('savedTags').innerText = savedSteps.map((_, i) => `P${i+1}`).join(', ');
+            document.getElementById('savedListDetail').innerHTML = savedSteps.map((s, i) => {
+                const isActive = (isRunning === 1 && currentStepIndex === i);
+                return `<div class="step-item ${isActive ? 'active-step' : ''}">
+                    ${isActive ? '▶ ' : ''}<strong>P${i+1}</strong> → J1: ${s.j1}°, J2: ${s.j2}°, Φ: ${s.j3}°, Z: ${s.z}mm, Garra: ${s.gripper}%
+                </div>`;
+            }).join('');
+        }
+
+        function toggleRun() {
+            if (isRunning === 0) {
+                if (savedSteps.length === 0) {
+                    alert("Salve pelo menos uma posição antes de rodar o programa!");
+                    return;
+                }
+                isRunning = 1;
+                updateRunButtons(true);
+                syncVisualsAndSend(true);
+                startProgramSimulation();
+            } else {
+                stopProgramSimulation();
+            }
+        }
+
+        function stopProgramSimulation() {
+            isRunning = 0;
+            currentStepIndex = -1;
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            updateRunButtons(false);
+            updateStepBadges("MODO MANUAL", false);
+            renderSavedStepsList();
+            syncVisualsAndSend(true);
+        }
+
+        function updateRunButtons(active) {
+            const btn1 = document.getElementById('btnRun');
+            const btn2 = document.getElementById('btnRunSim');
+            if (active) {
+                btn1.innerText = "Parar Execução";
+                btn1.classList.add('running');
+                btn2.innerText = "Parar Execução";
+                btn2.classList.add('running');
+            } else {
+                btn1.innerText = "Rodar Programa";
+                btn1.classList.remove('running');
+                btn2.innerText = "Rodar Programa";
+                btn2.classList.remove('running');
+            }
+        }
+
+        function updateStepBadges(text, running) {
+            const b1 = document.getElementById('stepStatusBadge');
+            const b2 = document.getElementById('simStepHud');
+            b1.innerText = text;
+            b2.innerText = "Status: " + text;
+            if (running) {
+                b1.classList.add('running');
+            } else {
+                b1.classList.remove('running');
+            }
+        }
+
+        function calcTrapezoidalDuration(steps, maxSpeed, accel) {
+            const d = Math.abs(steps);
+            if (d === 0) return 0;
+            const tAccel = maxSpeed / accel;
+            const dAccel = 0.5 * accel * tAccel * tAccel;
+            if (2 * dAccel >= d) {
+                return 2 * Math.sqrt(d / accel);
+            } else {
+                const dConst = d - 2 * dAccel;
+                return 2 * tAccel + (dConst / maxSpeed);
+            }
+        }
+
+        function trapezoidalProgress(t, totalT, maxSpeed, accel, steps) {
+            const d = Math.abs(steps);
+            if (d === 0 || totalT <= 0) return 1;
+            const tAccel = maxSpeed / accel;
+            const dAccel = 0.5 * accel * tAccel * tAccel;
+
+            if (2 * dAccel >= d) {
+                const halfT = totalT / 2;
+                if (t <= halfT) {
+                    return (0.5 * accel * t * t) / d;
+                } else {
+                    const dt = totalT - t;
+                    return 1 - (0.5 * accel * dt * dt) / d;
+                }
+            } else {
+                if (t <= tAccel) {
+                    return (0.5 * accel * t * t) / d;
+                } else if (t <= totalT - tAccel) {
+                    return (dAccel + maxSpeed * (t - tAccel)) / d;
+                } else {
+                    const dt = totalT - t;
+                    return 1 - (0.5 * accel * dt * dt) / d;
+                }
+            }
+        }
+
+        async function startProgramSimulation() {
+            let stepIdx = 0;
+
+            while (isRunning === 1 && savedSteps.length > 0) {
+                currentStepIndex = stepIdx;
+                const target = savedSteps[stepIdx];
+                const start = { ...simState };
+
+                updateStepBadges(`EXECUTANDO PASSO P${stepIdx + 1} DE P${savedSteps.length}`, true);
+                renderSavedStepsList();
+
+                const dSteps1 = (target.j1 - start.j1) * STEPS_J1;
+                const dSteps2 = (target.j2 - start.j2) * STEPS_J2;
+                const dSteps3 = (target.j3 - start.j3) * STEPS_J3;
+                const dSteps4 = (target.z  - start.z)  * STEPS_Z;
+
+                await new Promise(resolve => {
+                    let elapsed = 0;
+                    let lastTime = performance.now();
+
+                    function animateMove(now) {
+                        if (isRunning === 0) {
+                            resolve();
+                            return;
+                        }
+
+                        const dt = (now - lastTime) / 1000;
+                        lastTime = now;
+                        elapsed += dt;
+
+                        const vMax = parseFloat(document.getElementById('speed').value);
+                        const acc  = parseFloat(document.getElementById('accel').value);
+
+                        const t1 = calcTrapezoidalDuration(dSteps1, vMax, acc);
+                        const t2 = calcTrapezoidalDuration(dSteps2, vMax, acc);
+                        const t3 = calcTrapezoidalDuration(dSteps3, vMax, acc);
+                        const t4 = calcTrapezoidalDuration(dSteps4, vMax, acc);
+
+                        const maxDuration = Math.max(t1, t2, t3, t4, 0.05);
+
+                        const p1 = trapezoidalProgress(Math.min(elapsed, t1), t1, vMax, acc, dSteps1);
+                        const p2 = trapezoidalProgress(Math.min(elapsed, t2), t2, vMax, acc, dSteps2);
+                        const p3 = trapezoidalProgress(Math.min(elapsed, t3), t3, vMax, acc, dSteps3);
+                        const p4 = trapezoidalProgress(Math.min(elapsed, t4), t4, vMax, acc, dSteps4);
+
+                        simState.j1 = start.j1 + (target.j1 - start.j1) * p1;
+                        simState.j2 = start.j2 + (target.j2 - start.j2) * p2;
+                        simState.j3 = start.j3 + (target.j3 - start.j3) * p3;
+                        simState.z  = start.z  + (target.z  - start.z)  * p4;
+
+                        syncVisualsAndSend(false);
+
+                        if (elapsed >= maxDuration) {
+                            simState.j1 = target.j1;
+                            simState.j2 = target.j2;
+                            simState.j3 = target.j3;
+                            simState.z  = target.z;
+                            syncVisualsAndSend(false);
+                            resolve();
+                        } else {
+                            animFrameId = requestAnimationFrame(animateMove);
+                        }
+                    }
+
+                    animFrameId = requestAnimationFrame(animateMove);
+                });
+
+                if (isRunning === 0) break;
+
+                if (stepIdx === 0 || target.gripper !== start.gripper) {
+                    simState.gripper = target.gripper;
+                    syncVisualsAndSend(false);
+                    await new Promise(r => setTimeout(r, 400));
+                }
+
+                stepIdx = (stepIdx + 1) % savedSteps.length;
+            }
+        }
+
+        function clearPositions() {
+            if (isRunning === 1) stopProgramSimulation();
+            saveStatus = 2;
+            savedSteps = [];
+            renderSavedStepsList();
+            syncVisualsAndSend(true);
+            saveStatus = 0;
+        }
+
+        function goHome() {
+            if (isRunning === 1) stopProgramSimulation();
+            simState = { j1: 0, j2: 0, j3: 0, z: 100, gripper: simState.gripper };
+            syncVisualsAndSend(true);
+        }
+
+        function applyIK() {
+            if (isRunning === 1) stopProgramSimulation();
+            const x = parseFloat(document.getElementById('ikX').value);
+            const y = parseFloat(document.getElementById('ikY').value);
+            const z = parseFloat(document.getElementById('ikZ').value);
+
+            const cosT2 = (x*x + y*y - L1*L1 - L2*L2) / (2 * L1 * L2);
+            if (cosT2 < -1 || cosT2 > 1) {
+                alert("Coordenada fora do alcance físico do braço SCARA!");
+                return;
+            }
+
+            const t2 = Math.acos(cosT2);
+            const t1 = Math.atan2(y, x) - Math.atan2(L2 * Math.sin(t2), L1 + L2 * Math.cos(t2));
+
+            simState.j1 = Math.round(t1 * 180 / Math.PI);
+            simState.j2 = Math.round(t2 * 180 / Math.PI);
+            simState.z  = z;
+            syncVisualsAndSend(true);
+        }
+
+        function drawRobot() {
+            const canvas = document.getElementById('scaraCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2 + 30;
+            const scale = 0.65;
+
+            ctx.strokeStyle = '#111b36';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, (L1 + L2) * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            savedSteps.forEach((step, idx) => {
+                const sr1 = step.j1 * Math.PI / 180;
+                const sr2 = step.j2 * Math.PI / 180;
+                const px = cx + (L1 * Math.cos(sr1) + L2 * Math.cos(sr1 + sr2)) * scale;
+                const py = cy - (L1 * Math.sin(sr1) + L2 * Math.sin(sr1 + sr2)) * scale;
+
+                const isCurrentTarget = (isRunning === 1 && currentStepIndex === idx);
+
+                ctx.fillStyle = isCurrentTarget ? '#10b981' : 'rgba(79, 134, 247, 0.45)';
+                ctx.beginPath();
+                ctx.arc(px, py, isCurrentTarget ? 7 : 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = isCurrentTarget ? '#10b981' : '#64748b';
+                ctx.font = isCurrentTarget ? 'bold 12px monospace' : '11px monospace';
+                ctx.fillText(`P${idx + 1}`, px + 9, py + 4);
+            });
+
+            const a1 = simState.j1 * Math.PI / 180;
+            const a2 = simState.j2 * Math.PI / 180;
+            const a3 = simState.j3 * Math.PI / 180;
+
+            const x1 = cx + L1 * scale * Math.cos(a1);
+            const y1 = cy - L1 * scale * Math.sin(a1);
+            const x2 = x1 + L2 * scale * Math.cos(a1 + a2);
+            const y2 = y1 - L2 * scale * Math.sin(a1 + a2);
+
+            ctx.strokeStyle = '#4f86f7';
+            ctx.lineWidth = 11;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x1, y1);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 7;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#f1f5f9';
+            ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x1, y1, 8, 0, Math.PI * 2); ctx.fill();
+
+            const phiAngle = a1 + a2 + a3;
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 + 24 * Math.cos(phiAngle), y2 - 24 * Math.sin(phiAngle));
+            ctx.stroke();
+
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath(); ctx.arc(x2, y2, 6, 0, Math.PI * 2); ctx.fill();
+
+            ctx.fillStyle = isRunning === 1 ? '#10b981' : '#64748b';
+            ctx.font = 'bold 13px monospace';
+            const hudText = isRunning === 1 
+                ? `▶ RODANDO: PASSO P${currentStepIndex + 1} DE P${savedSteps.length}` 
+                : '● MODO MANUAL';
+            ctx.fillText(hudText, 18, 28);
+        }
+
+        window.onload = function() {
+            connectWebSocket();
+            syncVisualsAndSend(false);
+        };
+    </script>
+</body>
+</html>
